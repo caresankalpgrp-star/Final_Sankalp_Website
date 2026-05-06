@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+dist-serverbyt/
+
+# Environment — NEVER commit real keys
+.env
+.env.local
+.env.production
+
+# Vercel internals
+.vercel/
+
+# Dev tools
+.vite-source-tags.js
+*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archives
+*.tar.gz
+*.zip
