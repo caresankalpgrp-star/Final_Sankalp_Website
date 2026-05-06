@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Plus, Pencil, Trash2, Save, X, Loader, Image as ImageIcon,
-  ExternalLink, Eye, EyeOff, GripVertical, RefreshCw, AlertCircle
+  ExternalLink, Eye, EyeOff, RefreshCw, AlertCircle
 } from 'lucide-react';
 import { apiUrl } from '../lib/api';
+import ImageUpload from './ImageUpload';
 
 interface Catalog {
   id?: number;
@@ -59,9 +60,6 @@ export default function CatalogAdmin() {
   const [saving, setSaving]   = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [toggling, setToggling] = useState<number | null>(null);
-  const [imgPickerOpen, setImgPickerOpen] = useState(false);
-  const [imgSearch, setImgSearch] = useState('');
-  const [customUrl, setCustomUrl] = useState('');
   const formRef = useRef<HTMLDivElement>(null);
 
   const fetch_ = async () => {
@@ -86,7 +84,7 @@ export default function CatalogAdmin() {
     setTimeout(() => formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   };
 
-  const closeForm = () => { setShowForm(false); setForm(EMPTY); setEditing(null); setImgPickerOpen(false); };
+  const closeForm = () => { setShowForm(false); setForm(EMPTY); setEditing(null); };
 
   const save = async () => {
     if (!form.title.trim())     return alert('Title is required');
@@ -134,10 +132,7 @@ export default function CatalogAdmin() {
     finally { setToggling(null); }
   };
 
-  const filteredImages = CATALOG_IMAGES.filter(img =>
-    img.label.toLowerCase().includes(imgSearch.toLowerCase()) ||
-    img.path.toLowerCase().includes(imgSearch.toLowerCase())
-  );
+  const filteredImages = CATALOG_IMAGES; // kept reference (now passed to <ImageUpload library/>)
 
   const activeCount   = items.filter(i => i.active).length;
   const inactiveCount = items.filter(i => !i.active).length;
@@ -209,102 +204,16 @@ export default function CatalogAdmin() {
               />
             </div>
 
-            {/* ── Cover Image Picker ── */}
+            {/* ── Cover Image (uploader + library + custom URL) ── */}
             <div className="md:col-span-2">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1.5">Cover Image *</label>
-
-              {/* Current preview */}
-              {form.image_url && (
-                <div className="flex items-center gap-3 mb-3 p-3 rounded-xl" style={{ background: 'rgba(240,124,30,0.06)', border: '1px solid rgba(240,124,30,0.15)' }}>
-                  <img src={form.image_url} alt="preview" className="w-16 h-12 rounded-lg object-cover flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-gray-700 text-sm font-medium truncate">{form.image_url}</p>
-                    <p className="text-gray-400 text-xs mt-0.5">Current cover image</p>
-                  </div>
-                  <button
-                    onClick={() => inp('image_url', '')}
-                    className="text-red-400 hover:text-red-600 flex-shrink-0"
-                    title="Remove"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              )}
-
-              {/* Toggle picker */}
-              <button
-                onClick={() => setImgPickerOpen(o => !o)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all hover:bg-gray-50"
-                style={{ borderColor: imgPickerOpen ? '#f07c1e' : '#e0e0e8', color: imgPickerOpen ? '#f07c1e' : '#555' }}
-              >
-                <ImageIcon size={15} />
-                {imgPickerOpen ? 'Close Image Picker' : 'Choose from Library'}
-              </button>
-
-              {/* Image picker panel */}
-              {imgPickerOpen && (
-                <div className="mt-3 p-4 rounded-2xl border" style={{ borderColor: '#e8e8f0', background: '#fafafa' }}>
-                  {/* Search */}
-                  <input
-                    value={imgSearch}
-                    onChange={e => setImgSearch(e.target.value)}
-                    placeholder="Search images..."
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:border-orange-400 mb-3"
-                  />
-                  {/* Grid */}
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-64 overflow-y-auto">
-                    {filteredImages.map(img => (
-                      <button
-                        key={img.path}
-                        onClick={() => { inp('image_url', img.path); setImgPickerOpen(false); setImgSearch(''); }}
-                        className="relative rounded-xl overflow-hidden group"
-                        style={{
-                          border: form.image_url === img.path ? '2.5px solid #f07c1e' : '2px solid transparent',
-                          boxShadow: form.image_url === img.path ? '0 0 0 3px rgba(240,124,30,0.2)' : 'none',
-                        }}
-                        title={img.label}
-                      >
-                        <img
-                          src={img.path}
-                          alt={img.label}
-                          className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          style={{ aspectRatio: '4/3' }}
-                        />
-                        {form.image_url === img.path && (
-                          <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(240,124,30,0.3)' }}>
-                            <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center">
-                              <span className="text-white text-xs font-bold">✓</span>
-                            </div>
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 px-1.5 py-1" style={{ background: 'rgba(0,0,0,0.6)' }}>
-                          <p className="text-white text-xs truncate" style={{ fontSize: '9px' }}>{img.label}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Custom URL input */}
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-xs text-gray-400 mb-2">Or enter a custom image path:</p>
-                    <div className="flex gap-2">
-                      <input
-                        value={customUrl}
-                        onChange={e => setCustomUrl(e.target.value)}
-                        placeholder="/catalogs/your-image.jpg"
-                        className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:border-orange-400"
-                      />
-                      <button
-                        onClick={() => { if (customUrl.trim()) { inp('image_url', customUrl.trim()); setImgPickerOpen(false); setCustomUrl(''); } }}
-                        className="px-4 py-2 rounded-xl text-sm font-medium text-white"
-                        style={{ background: 'linear-gradient(135deg,#f07c1e,#d4640a)' }}
-                      >
-                        Use
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <ImageUpload
+                value={form.image_url}
+                onChange={url => inp('image_url', url)}
+                folder="catalogs"
+                label="Cover Image *"
+                library={CATALOG_IMAGES}
+                required
+              />
             </div>
 
             {/* Album URL */}

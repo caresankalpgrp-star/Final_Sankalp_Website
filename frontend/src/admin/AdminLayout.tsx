@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FolderOpen, BookOpen, Star,
-  Settings, LogOut, Menu, X, ChevronRight, Bell, Home, Images
+  Settings, LogOut, Menu, X, ChevronRight, Bell, Home, Images, Wrench
 } from 'lucide-react';
 import supabase from '../lib/supabase';
 
@@ -10,6 +10,7 @@ const navItems = [
   { path: '/admin',                label: 'Dashboard',    icon: LayoutDashboard },
   { path: '/admin/leads',          label: 'Leads',        icon: Users,      badge: true },
   { path: '/admin/projects',       label: 'Projects',     icon: FolderOpen },
+  { path: '/admin/services',       label: 'Services',     icon: Wrench },
   { path: '/admin/catalog',        label: 'Catalog',      icon: Images },
   { path: '/admin/blog',           label: 'Blog Posts',   icon: BookOpen },
   { path: '/admin/testimonials',   label: 'Testimonials', icon: Star },

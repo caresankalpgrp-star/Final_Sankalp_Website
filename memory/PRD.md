@@ -38,7 +38,7 @@ serverless handlers, proxying to Supabase REST + Auth + Storage |
   - `GET/POST/PUT/DELETE /api/projects`
   - `GET/POST/PUT/DELETE /api/blog` (also `?slug=`)
   - `GET/POST/PUT/DELETE /api/testimonials`
-  - `GET /api/services`
+  - `GET/POST/PUT/DELETE /api/services`  ← extended from GET-only
   - `GET/POST/PUT/DELETE /api/catalogs`
   - `POST /api/upload` (Supabase Storage, bucket `sankalp-media`, with `ui-avatars` fallback)
   - `GET /api/sitemap`, `GET /api/robots`, plus `/sitemap.xml` & `/robots.txt` aliases
@@ -50,12 +50,26 @@ serverless handlers, proxying to Supabase REST + Auth + Storage |
   - JSON dumps of OLD and NEW tables for audit
 - Verified end-to-end: homepage loads, `/projects` loads, admin login → dashboard shows all real data
 
+### Iteration 2 — Admin upgrades (2026-05-06)
+- Created public Supabase Storage bucket `sankalp-media` (5 MB limit)
+- New reusable `<ImageUpload />` component (`/app/frontend/src/admin/ImageUpload.tsx`):
+  click-or-drop file upload + preset library picker + custom URL paste, with size/MIME validation
+- **Image upload now works** in: Projects admin, Blog admin, Catalog admin, Services admin (all 4)
+- **NEW `ServicesAdmin`** page: full CRUD (title, slug, price range, timeline, sort order,
+  popular toggle, description, dynamic features list with reorder, image upload). Wired into
+  `App.tsx` route `/admin/services` and `AdminLayout` sidebar (wrench icon).
+- DashboardPage upgraded: 6-stat grid (added Services & Testimonials) + new "Manage Services"
+  quick-action card. Lazy-chunked `ServicesAdmin` & `ImageUpload` in vite.config.
+
 ## Verified Working
 - ✅ Public site renders (home, projects pages screenshot-confirmed)
 - ✅ All `/api/*` endpoints return data from new Supabase
 - ✅ Admin login at `/admin/login` succeeds via Supabase Auth (token returned)
-- ✅ Dashboard widgets show: 8 leads, 10 projects, 11 catalog, 35 blog posts
+- ✅ Dashboard widgets show: 8 leads, 10 projects, 6 services, 11 catalog, 35 blog posts, 6 testimonials
 - ✅ No outbound calls to `auwnsmyvokjlmfmnpedi.supabase.co` (Design Arena) anywhere
+- ✅ E2E browser test (Playwright): Services admin → Add Service → image upload to
+  Supabase Storage → save → new card appears (`#7` shown in screenshot, then cleaned up)
+- ✅ Test PNG uploaded successfully to `sankalp-media/services/` → public URL accessible
 
 ## Backlog / Next Tasks
 - P1 — Reset Postgres sequences (`SELECT setval('blog_posts_id_seq', max(id))…`) so

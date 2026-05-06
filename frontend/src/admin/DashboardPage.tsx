@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, FolderOpen, BookOpen, Star, TrendingUp, ArrowRight, Phone, MessageCircle, Clock, Images } from 'lucide-react';
+import { Users, FolderOpen, BookOpen, Star, TrendingUp, ArrowRight, Phone, MessageCircle, Clock, Images, Wrench } from 'lucide-react';
 import { apiUrl } from '../lib/api';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({ leads: 0, newLeads: 0, projects: 0, blogs: 0, testimonials: 0, catalogs: 0 });
+  const [stats, setStats] = useState({ leads: 0, newLeads: 0, projects: 0, blogs: 0, testimonials: 0, catalogs: 0, services: 0 });
   const [recentLeads, setRecentLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -15,7 +15,8 @@ export default function DashboardPage() {
       fetch(apiUrl('/api/blog')).then(r => r.json()),
       fetch(apiUrl('/api/testimonials')).then(r => r.json()),
       fetch(apiUrl('/api/catalogs?all=true')).then(r => r.json()),
-    ]).then(([leads, projects, blogs, testimonials, catalogs]) => {
+      fetch(apiUrl('/api/services')).then(r => r.json()),
+    ]).then(([leads, projects, blogs, testimonials, catalogs, services]) => {
       setStats({
         leads: leads.length,
         newLeads: leads.filter((l: any) => l.status === 'new').length,
@@ -23,6 +24,7 @@ export default function DashboardPage() {
         blogs: blogs.length,
         testimonials: testimonials.length,
         catalogs: Array.isArray(catalogs) ? catalogs.length : 0,
+        services: Array.isArray(services) ? services.length : 0,
       });
       setRecentLeads(leads.slice(0, 5));
     }).catch(console.error).finally(() => setLoading(false));
@@ -31,8 +33,10 @@ export default function DashboardPage() {
   const statCards = [
     { label: 'Total Leads',    value: stats.leads,        sub: `${stats.newLeads} new`,    icon: Users,      color: '#0f2044', link: '/admin/leads' },
     { label: 'Projects',       value: stats.projects,     sub: 'in portfolio',              icon: FolderOpen, color: '#f07c1e', link: '/admin/projects' },
+    { label: 'Services',       value: stats.services,     sub: 'service offerings',         icon: Wrench,     color: '#16a34a', link: '/admin/services' },
     { label: 'Catalog',        value: stats.catalogs,     sub: 'design collections',        icon: Images,     color: '#7c3aed', link: '/admin/catalog' },
     { label: 'Blog Posts',     value: stats.blogs,        sub: 'published',                 icon: BookOpen,   color: '#1a3a6b', link: '/admin/blog' },
+    { label: 'Testimonials',   value: stats.testimonials, sub: 'client reviews',            icon: Star,       color: '#f07c1e', link: '/admin/testimonials' },
   ];
 
   return (
@@ -43,7 +47,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8" data-testid="dashboard-stats">
         {statCards.map(({ label, value, sub, icon: Icon, color, link }) => (
           <Link key={label} to={link}
             className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5"
@@ -122,6 +126,7 @@ export default function DashboardPage() {
           <div className="p-6 space-y-3">
             {[
               { label: 'Add New Project',     link: '/admin/projects',     icon: FolderOpen, color: '#f07c1e', desc: 'Add to your portfolio' },
+              { label: 'Manage Services',     link: '/admin/services',     icon: Wrench,     color: '#16a34a', desc: 'Services & pricing' },
               { label: 'Manage Catalog',      link: '/admin/catalog',      icon: Images,     color: '#7c3aed', desc: 'Update design catalog' },
               { label: 'Write Blog Post',     link: '/admin/blog',         icon: BookOpen,   color: '#0f2044', desc: 'Publish new SEO content' },
               { label: 'View All Leads',      link: '/admin/leads',        icon: Users,      color: '#1a3a6b', desc: `${stats.newLeads} new enquiries` },

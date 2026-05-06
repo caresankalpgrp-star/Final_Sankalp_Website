@@ -29,6 +29,7 @@ import ProjectsAdmin from './admin/ProjectsAdmin';
 import BlogAdmin from './admin/BlogAdmin';
 import TestimonialsAdmin from './admin/TestimonialsAdmin';
 import CatalogAdmin from './admin/CatalogAdmin';
+import ServicesAdmin from './admin/ServicesAdmin';
 
 function PublicLayout() {
   const location = useLocation();
@@ -67,6 +68,7 @@ function AdminRoutes() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/leads" element={<LeadsAdmin />} />
         <Route path="/projects" element={<ProjectsAdmin />} />
+        <Route path="/services" element={<ServicesAdmin />} />
         <Route path="/blog" element={<BlogAdmin />} />
         <Route path="/testimonials" element={<TestimonialsAdmin />} />
         <Route path="/catalog" element={<CatalogAdmin />} />

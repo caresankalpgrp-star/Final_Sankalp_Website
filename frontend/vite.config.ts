@@ -62,6 +62,9 @@ export default defineConfig(async () => {
               './src/admin/ProjectsAdmin',
               './src/admin/BlogAdmin',
               './src/admin/TestimonialsAdmin',
+              './src/admin/CatalogAdmin',
+              './src/admin/ServicesAdmin',
+              './src/admin/ImageUpload',
             ],
             'location-data':  [
               './src/seo/locationData',

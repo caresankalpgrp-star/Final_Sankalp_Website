@@ -260,6 +260,44 @@ def get_services():
     return sb_select("services", {"select": "*", "order": "sort_order.asc"})
 
 
+@api.post("/services", status_code=201)
+async def create_service(req: Request):
+    body = await req.json()
+    if not body.get("title") or not body.get("slug"):
+        raise HTTPException(status_code=400, detail="Title and slug required")
+    payload = {
+        "title": body.get("title"),
+        "slug": body.get("slug"),
+        "description": body.get("description"),
+        "price_range": body.get("price_range"),
+        "timeline": body.get("timeline"),
+        "image_url": body.get("image_url"),
+        "features": body.get("features") or [],
+        "popular": body.get("popular") or False,
+        "sort_order": body.get("sort_order") or 0,
+    }
+    return sb_insert("services", payload)
+
+
+@api.put("/services")
+async def update_service(req: Request):
+    body = await req.json()
+    row_id = body.pop("id", None)
+    if not row_id:
+        raise HTTPException(status_code=400, detail="ID required")
+    return sb_update("services", row_id, body)
+
+
+@api.delete("/services")
+async def delete_service(req: Request):
+    body = await req.json()
+    row_id = body.get("id")
+    if not row_id:
+        raise HTTPException(status_code=400, detail="ID required")
+    sb_delete("services", row_id)
+    return {"ok": True}
+
+
 # ─────────────── /api/catalogs ───────────────
 @api.get("/catalogs")
 def get_catalogs(all: Optional[str] = None):
