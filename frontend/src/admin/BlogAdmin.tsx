@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Save, X, Loader } from 'lucide-react';
 import { apiUrl } from '../lib/api';
 import ImageUpload from './ImageUpload';
+import RichTextEditor from './RichTextEditor';
 
 interface Post {
   id?: number; title: string; slug: string; excerpt: string;
@@ -139,9 +140,16 @@ export default function BlogAdmin() {
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-orange-400 resize-none" />
             </div>
             <div className="md:col-span-2">
-              <label className="text-xs font-medium text-gray-500 block mb-1">Content (HTML supported)</label>
-              <textarea value={form.content} onChange={e=>inp('content',e.target.value)} rows={10} placeholder="Write your full blog post here. HTML tags like <h2>, <p>, <ul>, <strong> are supported..."
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none focus:border-orange-400 resize-none font-mono" />
+              <label className="text-xs font-medium text-gray-500 block mb-1">Content</label>
+              <RichTextEditor
+                value={form.content}
+                onChange={html => inp('content', html)}
+                placeholder="Write your full blog post here. Use the toolbar for headings, lists, links, images, and more…"
+                uploadFolder="blog"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Tip: Use the image button in the toolbar to upload pictures inline. They go straight to your Supabase storage.
+              </p>
             </div>
           </div>
           <div className="flex gap-3 mt-5">

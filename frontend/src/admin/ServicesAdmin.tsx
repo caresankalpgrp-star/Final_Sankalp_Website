@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Save, X, Loader, Wrench, Star, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, X, Loader, Wrench, Star, ChevronUp, ChevronDown, Smile } from 'lucide-react';
 import { apiUrl } from '../lib/api';
 import ImageUpload from './ImageUpload';
 
@@ -20,6 +20,71 @@ const EMPTY: Service = {
   title:'', slug:'', description:'', price_range:'', timeline:'',
   image_url:'', features:[], popular:false, sort_order:0,
 };
+
+// Curated emoji palette for service features. Plain Unicode → no schema change.
+const FEATURE_ICONS = [
+  '✓', '★', '✨', '🔧', '🎨', '🏠', '🛋️', '🛏️',
+  '🍳', '🚿', '🪑', '🪟', '🧱', '💡', '⚡', '📐',
+  '📏', '🎯', '⏱️', '💎', '🛠️', '🪞', '🚪', '🧰',
+];
+
+// Strip a leading emoji + space from a feature string, returning [emoji, rest].
+const splitFeature = (s: string): { icon: string; text: string } => {
+  // Match leading "icon" (non-letter, non-digit, non-space — allows multi-codepoint emoji) + optional space
+  const m = s.match(/^([^\p{L}\p{N}\s][\u200d\ufe0f]?[^\p{L}\p{N}\s]?)\s*(.*)$/u);
+  if (m && m[1] && FEATURE_ICONS.some(i => s.startsWith(i + ' ') || s.startsWith(i))) {
+    // Pick from palette to be safe
+    const found = FEATURE_ICONS.find(i => s.startsWith(i + ' ') || s.startsWith(i));
+    if (found) return { icon: found, text: s.slice(found.length).replace(/^\s+/, '') };
+  }
+  return { icon: '', text: s };
+};
+const joinFeature = (icon: string, text: string) =>
+  icon ? `${icon} ${text}`.trim() : text.trim();
+
+// Compact per-row icon swap button + popover
+function FeatureIconPicker({ value, onChange }: { value: string; onChange: (icon: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-gray-100 text-base"
+        style={{ background: open ? 'rgba(240,124,30,0.1)' : 'transparent' }}
+        title="Change icon"
+      >
+        <span className="leading-none">{value || '·'}</span>
+      </button>
+      {open && (
+        <div
+          className="absolute top-full left-0 mt-1 z-30 p-2 rounded-xl shadow-lg bg-white"
+          style={{ border: '1px solid #e5e7eb', width: '17rem' }}
+        >
+          <div className="grid grid-cols-8 gap-1">
+            <button
+              type="button"
+              onClick={() => { onChange(''); setOpen(false); }}
+              title="No icon"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-gray-100"
+              style={{ background: value === '' ? 'rgba(240,124,30,0.15)' : 'transparent', border: '1px dashed #e5e7eb' }}
+            >·</button>
+            {FEATURE_ICONS.map(ic => (
+              <button
+                key={ic}
+                type="button"
+                onClick={() => { onChange(ic); setOpen(false); }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-base hover:bg-gray-100"
+                style={{ background: value === ic ? 'rgba(240,124,30,0.15)' : 'transparent' }}
+                title={ic}
+              >{ic}</button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const LIBRARY = [
   { path:'/images/project1.jpg',     label:'Project 1' },
@@ -48,6 +113,8 @@ export default function ServicesAdmin() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<number|null>(null);
   const [featureDraft, setFeatureDraft] = useState('');
+  const [featureIcon, setFeatureIcon] = useState('✓');
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
 
   const fetch_ = async () => {
     setLoading(true);
@@ -75,12 +142,12 @@ export default function ServicesAdmin() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const closeForm = () => { setShowForm(false); setForm(EMPTY); setEditing(null); setFeatureDraft(''); };
+  const closeForm = () => { setShowForm(false); setForm(EMPTY); setEditing(null); setFeatureDraft(''); setFeatureIcon('✓'); setIconPickerOpen(false); };
 
   const addFeature = () => {
     const v = featureDraft.trim();
     if (!v) return;
-    inp('features', [...form.features, v]);
+    inp('features', [...form.features, joinFeature(featureIcon, v)]);
     setFeatureDraft('');
   };
   const removeFeature = (i: number) => inp('features', form.features.filter((_,idx)=>idx!==i));
@@ -89,6 +156,12 @@ export default function ServicesAdmin() {
     const j = i + dir;
     if (j < 0 || j >= next.length) return;
     [next[i], next[j]] = [next[j], next[i]];
+    inp('features', next);
+  };
+  const changeFeatureIcon = (i: number, icon: string) => {
+    const next = [...form.features];
+    const { text } = splitFeature(next[i]);
+    next[i] = joinFeature(icon, text);
     inp('features', next);
   };
 
@@ -277,7 +350,57 @@ export default function ServicesAdmin() {
               <label className="text-xs font-medium text-gray-500 block mb-1">
                 Features / What's included ({form.features.length})
               </label>
-              <div className="flex gap-2 mb-3">
+
+              <div className="flex items-stretch gap-2 mb-3 relative">
+                {/* Icon picker button */}
+                <button
+                  type="button"
+                  onClick={() => setIconPickerOpen(o => !o)}
+                  data-testid="service-feature-icon-toggle"
+                  className="px-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 flex items-center gap-1.5"
+                  style={{ minWidth: '4.25rem' }}
+                  title="Pick an icon"
+                >
+                  <span className="text-lg leading-none">{featureIcon || '·'}</span>
+                  <Smile size={13} className="text-gray-400" />
+                </button>
+
+                {iconPickerOpen && (
+                  <div
+                    className="absolute top-full left-0 mt-1 z-30 p-2 rounded-xl shadow-lg bg-white"
+                    style={{ border: '1px solid #e5e7eb', width: '17rem' }}
+                    data-testid="service-feature-icon-picker"
+                  >
+                    <div className="grid grid-cols-8 gap-1">
+                      <button
+                        type="button"
+                        onClick={() => { setFeatureIcon(''); setIconPickerOpen(false); }}
+                        title="No icon"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-gray-100"
+                        style={{ background: featureIcon === '' ? 'rgba(240,124,30,0.15)' : 'transparent', border: '1px dashed #e5e7eb' }}
+                      >
+                        ·
+                      </button>
+                      {FEATURE_ICONS.map(ic => (
+                        <button
+                          key={ic}
+                          type="button"
+                          onClick={() => { setFeatureIcon(ic); setIconPickerOpen(false); }}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-base hover:bg-gray-100"
+                          style={{ background: featureIcon === ic ? 'rgba(240,124,30,0.15)' : 'transparent' }}
+                          title={ic}
+                          data-testid={`service-feature-icon-${ic}`}
+                        >
+                          {ic}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-2 px-1">
+                      The chosen icon is prepended to each new feature you add.
+                    </p>
+                  </div>
+                )}
+
                 <input
                   value={featureDraft}
                   onChange={e => setFeatureDraft(e.target.value)}
@@ -296,28 +419,37 @@ export default function ServicesAdmin() {
                   <Plus size={14} /> Add
                 </button>
               </div>
+
               {form.features.length === 0 ? (
                 <p className="text-xs text-gray-400 italic">No features added yet.</p>
               ) : (
                 <ul className="space-y-1.5" data-testid="service-features-list">
-                  {form.features.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background:'#fafafa', border:'1px solid #efeff3' }}>
-                      <span className="text-xs text-gray-400 w-5 text-right">{i+1}.</span>
-                      <span className="flex-1 text-sm text-gray-700">{f}</span>
-                      <button type="button" onClick={() => moveFeature(i, -1)} disabled={i===0}
-                        className="text-gray-400 hover:text-gray-700 disabled:opacity-30" title="Move up">
-                        <ChevronUp size={14} />
-                      </button>
-                      <button type="button" onClick={() => moveFeature(i, 1)} disabled={i===form.features.length-1}
-                        className="text-gray-400 hover:text-gray-700 disabled:opacity-30" title="Move down">
-                        <ChevronDown size={14} />
-                      </button>
-                      <button type="button" onClick={() => removeFeature(i)}
-                        className="text-red-400 hover:text-red-600" title="Remove">
-                        <X size={14} />
-                      </button>
-                    </li>
-                  ))}
+                  {form.features.map((f, i) => {
+                    const { icon, text } = splitFeature(f);
+                    return (
+                      <li key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background:'#fafafa', border:'1px solid #efeff3' }}>
+                        <span className="text-xs text-gray-400 w-5 text-right">{i+1}.</span>
+                        {/* Per-item icon picker (compact) */}
+                        <FeatureIconPicker
+                          value={icon}
+                          onChange={ic => changeFeatureIcon(i, ic)}
+                        />
+                        <span className="flex-1 text-sm text-gray-700">{text}</span>
+                        <button type="button" onClick={() => moveFeature(i, -1)} disabled={i===0}
+                          className="text-gray-400 hover:text-gray-700 disabled:opacity-30" title="Move up">
+                          <ChevronUp size={14} />
+                        </button>
+                        <button type="button" onClick={() => moveFeature(i, 1)} disabled={i===form.features.length-1}
+                          className="text-gray-400 hover:text-gray-700 disabled:opacity-30" title="Move down">
+                          <ChevronDown size={14} />
+                        </button>
+                        <button type="button" onClick={() => removeFeature(i)}
+                          className="text-red-400 hover:text-red-600" title="Remove">
+                          <X size={14} />
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>

@@ -61,6 +61,22 @@ serverless handlers, proxying to Supabase REST + Auth + Storage |
 - DashboardPage upgraded: 6-stat grid (added Services & Testimonials) + new "Manage Services"
   quick-action card. Lazy-chunked `ServicesAdmin` & `ImageUpload` in vite.config.
 
+### Iteration 3 — Editor & Icons (2026-05-06)
+- Added **Tiptap WYSIWYG editor** (`/app/frontend/src/admin/RichTextEditor.tsx`) — replaces
+  the raw HTML textarea on Blog Post `content`. Toolbar: H1/H2/H3, bold/italic/underline/strike,
+  inline code, bullet/ordered lists, blockquote, text-align (L/C/R), link prompt, **inline image
+  upload** (uses the same `/api/upload` → Supabase Storage `sankalp-media/blog/`), 8 colour
+  swatches + clear, undo/redo, placeholder. Output is clean HTML stored in `blog_posts.content`.
+- Tiptap v3 named-export fix: `import { TextStyle, Color } from '@tiptap/extension-text-style'`
+  (the deprecated `@tiptap/extension-color` package still installed but unused).
+- **Service features** now support optional emoji/icon prefix (palette of 24 curated icons:
+  ✓ ★ ✨ 🔧 🎨 🏠 🛋️ 🛏️ 🍳 🚿 🪑 🪟 🧱 💡 ⚡ 📐 📏 🎯 ⏱️ 💎 🛠️ 🪞 🚪 🧰).
+  - Schema unchanged (`features text[]`) — icons are prepended as `"<emoji> text"` plain
+    strings, so existing data stays valid and the public site auto-renders them.
+  - Two-level pickers: a **global** picker (next to the input) controls the icon for newly-added
+    features, and an **inline** per-row picker lets the admin retroactively change the icon on
+    any existing feature.
+
 ## Verified Working
 - ✅ Public site renders (home, projects pages screenshot-confirmed)
 - ✅ All `/api/*` endpoints return data from new Supabase
