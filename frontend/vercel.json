@@ -19,12 +19,10 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_SUPABASE_URL":      "https://auwnsmyvokjlmfmnpedi.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_U-6PQbBvw0TGb2IIHlWQvQ_R_udC9Ob",
-    "SUPABASE_SERVICE_ROLE_KEY":     "sb_secret_F_OVOPeuyoL5ON860WRjaQ_i04u0bUa",
-    "VITE_SUPABASE_URL":             "https://auwnsmyvokjlmfmnpedi.supabase.co",
-    "VITE_SUPABASE_ANON_KEY":        "sb_publishable_U-6PQbBvw0TGb2IIHlWQvQ_R_udC9Ob",
-    "FULLSTACK_PROJECT_REF":         "auwnsmyvokjlmfmnpedi",
-    "FULLSTACK_RESTORE_API_URL":     "https://designarena.ai/api/fullstack-restore"
+    "NEXT_PUBLIC_SUPABASE_URL":      "https://jhrfnnnvivyyjzywnvse.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable__jKUC5tRXSijAYsdXyT1Uw_iiOfXl8J",
+    "SUPABASE_SERVICE_ROLE_KEY":     "sb_secret_wH7BY79yCUaCs1asbAXh9w_EUU7oXhw",
+    "VITE_SUPABASE_URL":             "https://jhrfnnnvivyyjzywnvse.supabase.co",
+    "VITE_SUPABASE_ANON_KEY":        "sb_publishable__jKUC5tRXSijAYsdXyT1Uw_iiOfXl8J"
   }
 }
