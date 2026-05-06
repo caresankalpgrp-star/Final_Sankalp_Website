@@ -1,0 +1,5 @@
+# Even if Vercel's root is set to `frontend/`, this is here as a second safety net.
+# Anything not needed at runtime / build time inside `frontend/` should be excluded.
+node_modules/
+api/__pycache__/
+.env.local

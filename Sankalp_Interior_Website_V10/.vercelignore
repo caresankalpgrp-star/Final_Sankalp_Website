@@ -1,0 +1,26 @@
+# Vercel should ignore everything that's not part of the Vite frontend build.
+# Even if Root Directory is left at repo root, these paths will be skipped.
+
+backend/
+backend/**
+memory/
+migration/
+sankalp_extracted/
+frontend_old/
+tests/
+test_reports/
+test_result.md
+
+# Common dev artefacts
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+yarn.lock
+
+# Local-only env files (Vercel reads env vars from its own dashboard / vercel.json)
+.env
+.env.local
+.env.*.local

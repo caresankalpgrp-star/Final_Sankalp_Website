@@ -27,25 +27,31 @@ Premium interior design website for **Sankalp Interior Solution**, Kolkata.
 ```
 sankalp-interior/
 ├── api/                        ← Vercel serverless API routes
-│   ├── _supabase.js            ← Supabase client (DO NOT EDIT)
-│   ├── _wake.js                ← DB wake utility (DO NOT EDIT)
+│   ├── _supabase.js            ← Supabase client (service-role, server-side)
+│   ├── _wake.js                ← Stand-alone (no-op)
 │   ├── leads.js                ← Lead form submissions
-│   ├── projects.js             ← Portfolio projects
-│   ├── blog.js                 ← Blog posts
-│   ├── testimonials.js         ← Client testimonials
-│   ├── services.js             ← Services data
+│   ├── projects.js             ← Portfolio projects (CRUD)
+│   ├── blog.js                 ← Blog posts (CRUD)
+│   ├── testimonials.js         ← Client testimonials (CRUD)
+│   ├── services.js             ← Services (CRUD)
+│   ├── catalogs.js             ← Design catalog collections (CRUD)
+│   ├── upload.js               ← Image upload to Supabase Storage
 │   ├── sitemap.js              ← Dynamic sitemap.xml
 │   └── robots.js               ← robots.txt
 │
 ├── src/
 │   ├── admin/                  ← Secure admin panel
-│   │   ├── LoginPage.tsx       ← Admin login (protected)
+│   │   ├── LoginPage.tsx       ← Admin login (Supabase Auth)
 │   │   ├── AdminLayout.tsx     ← Admin sidebar layout
 │   │   ├── DashboardPage.tsx   ← Overview dashboard
 │   │   ├── LeadsAdmin.tsx      ← Lead management
-│   │   ├── ProjectsAdmin.tsx   ← Portfolio management
-│   │   ├── BlogAdmin.tsx       ← Blog post management
-│   │   └── TestimonialsAdmin.tsx
+│   │   ├── ProjectsAdmin.tsx   ← Portfolio management (with image upload)
+│   │   ├── BlogAdmin.tsx       ← Blog post management (with WYSIWYG editor)
+│   │   ├── TestimonialsAdmin.tsx
+│   │   ├── ServicesAdmin.tsx   ← Services CRUD (with feature-icon picker)
+│   │   ├── CatalogAdmin.tsx    ← Design catalog management
+│   │   ├── ImageUpload.tsx     ← Reusable image-upload component
+│   │   └── RichTextEditor.tsx  ← Tiptap WYSIWYG editor
 │   │
 │   ├── components/             ← Reusable UI components
 │   │   ├── Navbar.tsx
@@ -126,7 +132,9 @@ git push -u origin main
 | `/admin` | Dashboard overview |
 | `/admin/leads` | View & manage leads |
 | `/admin/projects` | Add/edit portfolio projects |
-| `/admin/blog` | Write/edit blog posts |
+| `/admin/services` | Add/edit services |
+| `/admin/catalog` | Add/edit design catalogs |
+| `/admin/blog` | Write/edit blog posts (WYSIWYG) |
 | `/admin/testimonials` | Manage client reviews |
 
 **Default credentials:**
@@ -160,6 +168,11 @@ git push -u origin main
 | `blog_posts` | Blog articles |
 | `testimonials` | Client reviews |
 | `services` | Service listings |
+| `catalogs` | Design-catalog collections |
+| `auth.users` | Admin login (Supabase Auth) |
+
+Image uploads land in the public **`sankalp-media`** Supabase Storage bucket
+(folders: `projects/`, `blog/`, `services/`, `catalogs/`, `testimonials/`).
 
 ---
 

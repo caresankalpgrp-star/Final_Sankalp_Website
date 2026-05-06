@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Local env (committed via vercel.json — NEVER commit real secrets here)
+.env
+.env.local
+.env.*.local
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vite cache
+.vite/
+
+# Emergent / preview-only
+frontend_old/
+sankalp_extracted/
